@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+*.pyo
+*.log
+*.tmp
+.venv/
+venv/
+.env
+.DS_Store
+runs/
+models/*.pt
+yolov8n.pt
