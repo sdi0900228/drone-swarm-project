@@ -1,5 +1,10 @@
 from ultralytics import YOLO
 from pathlib import Path
+import sys
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
+from communication.mqtt_publisher import send_alert
 
 model = YOLO("yolov8n.pt")
 
@@ -7,6 +12,20 @@ input_dir = Path("data/samples")
 
 image_extensions = {".jpg", ".jpeg", ".png"}
 image_files = [p for p in input_dir.iterdir() if p.suffix.lower() in image_extensions]
+
+def llm_decision(persons, vehicles, image_name):
+    """
+    Simulated LLM reasoning (natural language output)
+    """
+    if persons > 5:
+        return f"ALERT: High crowd density detected at {image_name}"
+    elif vehicles > 10:
+        return f"ALERT: Heavy traffic detected at {image_name}"
+    elif persons > 0 and vehicles > 0:
+        return f"Mixed activity detected at {image_name}"
+    else:
+        return f"No significant activity at {image_name}"
+
 
 for image_path in image_files:
     results = model(image_path)
@@ -25,15 +44,13 @@ for image_path in image_files:
             elif class_name in {"car", "bus", "truck"}:
                 vehicle_count += 1
 
-    print(f"{image_path.name} -> persons: {person_count}, vehicles: {vehicle_count}")
+    
+print(f"{image_path.name} -> persons: {person_count}, vehicles: {vehicle_count}")
+    msg = llm_decision(person_count, vehicle_count, image_path.name)
 
-    if person_count > 5:
-        print("ALERT: crowd detected")
+    print(f"[LLM] {msg}")
 
-    if vehicle_count > 10:
-        print("ALERT: heavy traffic detected")
-
-    if person_count > 0 and vehicle_count > 0:
-        print("INFO: mixed activity detected")
+    if "ALERT" in msg:
+    	send_alert(msg)
 
     print("-" * 40)
