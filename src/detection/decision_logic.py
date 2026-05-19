@@ -13,28 +13,27 @@ input_dir = Path("data/samples")
 image_extensions = {".jpg", ".jpeg", ".png"}
 image_files = [p for p in input_dir.iterdir() if p.suffix.lower() in image_extensions]
 
-def llm_decision(persons, vehicles, trees, image_name):
+
+def llm_decision(persons, vehicles, image_name):
     """
     Simulated LLM reasoning (natural language output)
     """
     if persons > 5:
-    	return f"ALERT: High crowd density detected at {image_name} because {persons} people were detected"
+        return f"ALERT: High crowd density detected. The area appears crowded. Source: {image_name}"
     elif vehicles > 10:
-    	return f"ALERT: Heavy traffic detected at {image_name} because {vehicles} vehicles were detected"
-    elif trees > 5:
-    	return f"Green area detected at {image_name} with {trees} plants"
+        return f"ALERT: Heavy traffic detected. Possible congestion. Source: {image_name}"
     elif persons > 0 and vehicles > 0:
-        return f"Mixed activity detected at {image_name}"
+        return f"INFO: Mixed activity detected (people and vehicles). Source: {image_name}"
     else:
-        return f"No significant activity at {image_name}"
+        return f"OK: No significant activity detected. Source: {image_name}"
 
 
 for image_path in image_files:
+
     results = model(image_path)
 
     person_count = 0
     vehicle_count = 0
-    tree_count = 0
 
     for r in results:
         names = r.names
@@ -44,20 +43,17 @@ for image_path in image_files:
 
             if class_name == "person":
                 person_count += 1
-            elif class_name in {"car", "bus", "truck"}:
+
+            elif class_name in {"car", "bus", "truck", "motorcycle", "bicycle"}:
                 vehicle_count += 1
-	    elif class_name in {"potted plant"}:
-   		tree_count += 1
 
-    
-	print(f"{image_path.name} -> persons: {person_count}, vehicles: {vehicle_count}")
-	print(f"trees: {tree_count}")
+    print(f"{image_path.name} -> persons: {person_count}, vehicles: {vehicle_count}")
 
-	msg = llm_decision(person_count, vehicle_count, tree_count, image_path.name)
+    msg = llm_decision(person_count, vehicle_count, image_path.name)
 
-	print(f"[LLM] {msg}")
+    print(f"[LLM] {msg}")
 
-	if "ALERT" in msg:
-    	    send_alert(msg)
+    if "ALERT" in msg:
+        send_alert(msg)
 
-	print("-" * 40)
+    print("-" * 40)
