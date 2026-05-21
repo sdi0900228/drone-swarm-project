@@ -58,3 +58,40 @@
 - ανάλυση δραστηριότητας στο χρόνο  
 - αποφυγή επαναλαμβανόμενων alerts  
 - ανίχνευση αλλαγών κατάστασης (π.χ. crowd → traffic)  
+
+---
+
+## Εκτέλεση
+
+Τρέξε το πρόγραμμα:
+
+```bash
+python main.py
+ Επέλεξε λειτουργία: 
+1 → Ανίχνευση Εικόνων  
+2 → Ανίχνευση Βίντεο  
+
+---
+
+## Δομή Έργου
+
+drone-swarm-project/
+
+├── data/
+│ ├── samples/
+│ ├── videos/
+│
+├── src/
+│ ├── detection/
+│ │ ├── decision_logic.py
+│ │ ├── video_detection.py
+│ │
+│ ├── communication/
+│ │ └── mqtt_publisher.py
+│
+├── results/
+│ ├── log.txt
+│ ├── detections/
+│
+├── main.py
+├── requirements.txt
