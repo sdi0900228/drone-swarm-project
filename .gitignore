@@ -10,3 +10,11 @@ venv/
 runs/
 models/*.pt
 yolov8n.pt
+
+
+# Results (generated outputs)
+results/log.txt
+results/detections/
+
+# Ignore videos
+data/videos/
