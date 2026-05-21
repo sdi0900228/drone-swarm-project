@@ -1,5 +1,9 @@
 from ultralytics import YOLO
 from pathlib import Path
+import os
+
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+LOG_FILE = BASE_DIR / "results" / "log.txt"
 import sys
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
@@ -13,6 +17,11 @@ input_dir = Path("data/samples")
 image_extensions = {".jpg", ".jpeg", ".png"}
 image_files = [p for p in input_dir.iterdir() if p.suffix.lower() in image_extensions]
 
+def save_log(message):
+    os.makedirs(BASE_DIR / "results", exist_ok=True)
+    with open(LOG_FILE, "a") as f:
+        f.write(message + "\n")
+    print("LOG PATH:", LOG_FILE)
 
 def llm_decision(persons, vehicles, image_name):
     """
@@ -53,8 +62,13 @@ def main():
         msg = llm_decision(person_count, vehicle_count, image_path.name)
 
         print(f"[LLM] {msg}")
+        print("DEBUG: CALLING save_log")
+        save_log(f"{image_path.name} -> {msg}")
 
         if "ALERT" in msg:
              send_alert(msg)
 
         print("-" * 40)
+
+if __name__ == "__main__":
+        main()

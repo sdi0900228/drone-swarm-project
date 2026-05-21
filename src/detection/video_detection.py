@@ -1,6 +1,7 @@
 import cv2
 import sys
 from pathlib import Path
+import os
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
@@ -21,6 +22,14 @@ def llm_decision(persons, vehicles, frame_name):
         return f"INFO: Mixed activity in {frame_name}"
     else:
         return f"OK: No significant activity in {frame_name}"
+
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+LOG_FILE = BASE_DIR / "results" / "log.txt"
+
+def save_log(message):
+    os.makedirs(BASE_DIR / "results", exist_ok=True)
+    with open(LOG_FILE, "a") as f:
+        f.write(message + "\n")
 
 def main():
     for video_path in video_dir.glob("*.mp4"):
@@ -61,7 +70,14 @@ def main():
             print(f"[Frame {frame_count}] persons={person_count}, vehicles={vehicle_count}")
             print(f"[LLM] {msg}")
 
+            if msg != last_msg:
+                    save_log(f"{video_path.name} [frame {frame_count}] -> {msg}")
+                    
+
             if "ALERT" in msg:
-                send_alert(msg)
+                    send_alert(msg)
+
+            last_msg = msg        
+            
 
         cap.release()

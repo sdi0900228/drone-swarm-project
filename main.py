@@ -5,12 +5,12 @@ sys.path.append(str(Path(__file__).resolve().parent / "src"))
 
 def run_images():
     print("\n[MODE] Image Detection\n")
-    from detection.decision_logic import main as image_main
+    from src.detection.decision_logic import main as image_main
     image_main()
 
 def run_videos():
     print("\n[MODE] Video Detection\n")
-    from detection.video_detection import main as video_main
+    from src.detection.video_detection import main as video_main
     video_main()
 
 def main():
