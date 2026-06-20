@@ -1,10 +1,12 @@
 from ultralytics import YOLO
 from pathlib import Path
+
 import os
+import random
+import sys
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 LOG_FILE = BASE_DIR / "results" / "log.txt"
-import sys
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
@@ -23,18 +25,43 @@ def save_log(message):
         f.write(message + "\n")
     print("LOG PATH:", LOG_FILE)
 
-def llm_decision(persons, vehicles, image_name):
-    """
-    Simulated LLM reasoning (natural language output)
-    """
+def llm_decision(persons, vehicles, source):
+
+    crowd_msgs = [
+        f"ALERT: High crowd density detected in {source}. The area appears heavily populated.",
+        f"ALERT: Large number of people observed in {source}. Potential crowd formation.",
+        f"ALERT: Crowd activity is high in {source}. Monitoring recommended."
+    ]
+
+    traffic_msgs = [
+        f"ALERT: Heavy traffic detected in {source}. Possible congestion.",
+        f"ALERT: Significant vehicle presence in {source}. Traffic conditions may be critical.",
+        f"ALERT: Increased traffic levels observed in {source}."
+    ]
+
+    mixed_msgs = [
+        f"INFO: Mixed activity detected in {source} (people and vehicles).",
+        f"INFO: Both pedestrian and vehicle presence observed in {source}.",
+        f"INFO: Combined movement detected in {source}."
+    ]
+
+    normal_msgs = [
+        f"OK: No significant activity detected in {source}.",
+        f"OK: Area appears calm in {source}.",
+        f"OK: No unusual patterns detected in {source}."
+    ]
+
     if persons > 5:
-        return f"ALERT: High crowd density detected. The area appears crowded. Source: {image_name}"
+        return random.choice(crowd_msgs)
+
     elif vehicles > 10:
-        return f"ALERT: Heavy traffic detected. Possible congestion. Source: {image_name}"
+        return random.choice(traffic_msgs)
+
     elif persons > 0 and vehicles > 0:
-        return f"INFO: Mixed activity detected (people and vehicles). Source: {image_name}"
+        return random.choice(mixed_msgs)
+
     else:
-        return f"OK: No significant activity detected. Source: {image_name}"
+        return random.choice(normal_msgs)
 
 def main():
     for image_path in image_files:
@@ -57,18 +84,17 @@ def main():
                 elif class_name in {"car", "bus", "truck", "motorcycle", "bicycle"}:
                     vehicle_count += 1
 
-        print(f"{image_path.name} -> persons: {person_count}, vehicles: {vehicle_count}")
+        print(f"[RESULT] {image_path.name} -> persons: {person_count}, vehicles: {vehicle_count}")
 
         msg = llm_decision(person_count, vehicle_count, image_path.name)
 
         print(f"[LLM] {msg}")
-        print("DEBUG: CALLING save_log")
         save_log(f"{image_path.name} -> {msg}")
 
         if "ALERT" in msg:
              send_alert(msg)
 
-        print("-" * 40)
+        print("=" * 40)
 
 if __name__ == "__main__":
-        main()
+    main()
