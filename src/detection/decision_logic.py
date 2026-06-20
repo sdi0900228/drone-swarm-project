@@ -25,7 +25,16 @@ def save_log(message):
         f.write(message + "\n")
     print("LOG PATH:", LOG_FILE)
 
-def llm_decision(persons, vehicles, source):
+def llm_decision(persons, vehicles, animals, environment, source):
+
+    if persons > 15:
+        level = "CRITICAL"
+    elif persons > 10:
+        level = "HIGH"
+    elif persons > 5:
+        level = "MODERATE"
+    else:
+        level = "LOW"
 
     crowd_msgs = [
         f"ALERT: High crowd density detected in {source}. The area appears heavily populated.",
@@ -38,6 +47,16 @@ def llm_decision(persons, vehicles, source):
         f"ALERT: Significant vehicle presence in {source}. Traffic conditions may be critical.",
         f"ALERT: Increased traffic levels observed in {source}."
     ]
+
+    animal_msgs = [
+    f"INFO: Animal presence detected in {source}.",
+    f"INFO: Movement from animals observed in {source}.",
+]
+
+    object_msgs = [
+    f"INFO: Objects detected in {source}. Possible human activity.",
+    f"INFO: Suspicious items observed in {source}.",
+]
 
     mixed_msgs = [
         f"INFO: Mixed activity detected in {source} (people and vehicles).",
@@ -52,16 +71,32 @@ def llm_decision(persons, vehicles, source):
     ]
 
     if persons > 5:
-        return random.choice(crowd_msgs)
+        return f"[{level}] " + random.choice(crowd_msgs)
 
     elif vehicles > 10:
-        return random.choice(traffic_msgs)
+        
+        if vehicles > 20:
+            level = "CRITICAL"
+        elif vehicles > 10:
+            level = "HIGH"
+        elif vehicles > 5:
+            level = "MODERATE"
+        else:
+            level = "LOW"
 
+        return f"[{level}] " + random.choice(traffic_msgs)
+    
+    elif animals > 0:
+        return f"[{level}] " + random.choice(animal_msgs)
+
+    elif environment > 0:
+        return f"[{level}] " + random.choice(object_msgs)
+    
     elif persons > 0 and vehicles > 0:
-        return random.choice(mixed_msgs)
+        return f"[{level}] " + random.choice(mixed_msgs)
 
     else:
-        return random.choice(normal_msgs)
+        return f"[{level}] " + random.choice(normal_msgs)
 
 def main():
     for image_path in image_files:
@@ -71,6 +106,8 @@ def main():
 
         person_count = 0
         vehicle_count = 0
+        environment_count = 0
+        animal_count = 0
 
         for r in results:
             names = r.names
@@ -83,10 +120,14 @@ def main():
 
                 elif class_name in {"car", "bus", "truck", "motorcycle", "bicycle"}:
                     vehicle_count += 1
+                elif class_name in {"dog", "cat"}:
+    animal_count += 1
 
+                elif class_name in {"backpack", "handbag", "suitcase"}:
+    environment_count += 1
         print(f"[RESULT] {image_path.name} -> persons: {person_count}, vehicles: {vehicle_count}")
 
-        msg = llm_decision(person_count, vehicle_count, image_path.name)
+        msg = llm_decision(person_count, vehicle_count, animal_count, environment_count, image_path.name)
 
         print(f"[LLM] {msg}")
         save_log(f"{image_path.name} -> {msg}")

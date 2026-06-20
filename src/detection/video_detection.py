@@ -6,7 +6,6 @@ import os
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from ultralytics import YOLO
-from pathlib import Path
 from communication.mqtt_publisher import send_alert
 
 model = YOLO("yolov8n.pt")
@@ -32,12 +31,13 @@ def save_log(message):
         f.write(message + "\n")
 
 FRAME_SKIP = 10
+
 def main():
     for video_path in video_dir.glob("*.mp4"):
 
         cap = cv2.VideoCapture(str(video_path))
         frame_count = 0
-
+        last_person_count = 0
         last_msg = None
 
         print(f"\nProcessing video: {video_path.name}")
@@ -49,9 +49,9 @@ def main():
                 break
 
             frame_count += 1
-           
+
             if frame_count % FRAME_SKIP != 0:
-                 continue
+                continue
 
             results = model(frame)
 
@@ -69,7 +69,18 @@ def main():
                     elif class_name in {"car", "bus", "truck"}:
                         vehicle_count += 1
 
+            if person_count > last_person_count:
+                trend = "increasing"
+            elif person_count < last_person_count:
+                trend = "decreasing"
+            else:
+                trend = "stable"
+
+            last_person_count = person_count
+
             msg = llm_decision(person_count, vehicle_count, video_path.name)
+
+            msg = msg + f" (trend: {trend})"
 
             print(f"[Frame {frame_count}] persons={person_count}, vehicles={vehicle_count}")
             print(f"[LLM] {msg}")
@@ -82,7 +93,10 @@ def main():
                 if "ALERT" in msg:
                     send_alert(msg)
 
-                last_msg = msg     
-            
+                last_msg = msg
 
         cap.release()
+
+
+if __name__ == "__main__":
+    main()
