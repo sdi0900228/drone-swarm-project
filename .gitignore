@@ -8,6 +8,8 @@ venv/
 .env
 .DS_Store
 runs/
+data/videos/*
+!data/videos/.gitkeep
 models/*.pt
 yolov8n.pt
 

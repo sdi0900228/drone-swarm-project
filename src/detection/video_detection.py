@@ -31,13 +31,17 @@ def save_log(message):
     with open(LOG_FILE, "a") as f:
         f.write(message + "\n")
 
+FRAME_SKIP = 10
 def main():
     for video_path in video_dir.glob("*.mp4"):
 
         cap = cv2.VideoCapture(str(video_path))
         frame_count = 0
 
+        last_msg = None
+
         print(f"\nProcessing video: {video_path.name}")
+        print(f"[INFO] Using frame skip: {FRAME_SKIP}")
 
         while cap.isOpened():
             ret, frame = cap.read()
@@ -45,8 +49,8 @@ def main():
                 break
 
             frame_count += 1
-
-            if frame_count % 10 != 0:
+           
+            if frame_count % FRAME_SKIP != 0:
                  continue
 
             results = model(frame)
