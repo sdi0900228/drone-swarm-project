@@ -186,3 +186,16 @@ drone-swarm-project/
 * drone swarms
 * smart surveillance
 * edge AI συστήματα
+
+## Παράδειγμα Καταγραφής (Logs)
+
+```text
+test10.jpg -> ALERT: High crowd density detected.
+test5.jpg -> ALERT: Heavy traffic detected.
+test2.jpg -> OK: No significant activity detected.
+
+test_video11.mp4 [frame 70] -> INFO: Mixed activity in test_video11.mp4
+test_video11.mp4 [frame 100] -> ALERT: High crowd density in test_video11.mp4
+
+test_video12.mp4 [frame 10] -> ALERT: Heavy traffic in test_video12.mp4
+test_video12.mp4 [frame 80] -> INFO: Mixed activity in test_video12.mp4
