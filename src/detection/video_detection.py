@@ -75,13 +75,14 @@ def main():
             print(f"[LLM] {msg}")
 
             if msg != last_msg:
-                    save_log(f"{video_path.name} [frame {frame_count}] -> {msg}")
-                    
 
-            if "ALERT" in msg:
+                print(f"[STATE CHANGE] {msg}")
+                save_log(f"{video_path.name} [frame {frame_count}] -> {msg}")
+
+                if "ALERT" in msg:
                     send_alert(msg)
 
-            last_msg = msg        
+                last_msg = msg     
             
 
         cap.release()
